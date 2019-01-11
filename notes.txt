@@ -1,0 +1,26 @@
+The installed version of g++ is /usr/bin/g++, installed by XCode,
+Apple LLVM version 9.0.0 (clang-900.0.39.2), which supports -std=c++1z
+flags for most C++17 features.
+
+This will be fine.
+
+Also downloading the most recent gcc for laughs.
+
+$ brew install gcc --HEAD
+
+----
+
+BUZZ - unfortunately, this can't run on OS/X.  Spinning up an Ubuntu right now:
+
+root password: cCxdJTtth28VtH7ouVEUoEH2
+IP address: 192.237.188.205
+
+$ apt-get update && apt-get -y upgrade && apt-get -y install emacs clang git
+
+* Added an SSH key for logging in from my home server:
+
+https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/
+
+* Added a public key for GitHub: https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#platform-linux
+
+$ ssh-keygen -t rsa -b 4096 -C "tom@swirly.com"
