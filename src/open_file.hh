@@ -1,7 +1,9 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <array>
+#include <stdexcept>
 
 namespace tom {
 
@@ -14,7 +16,7 @@ namespace tom {
  */
 class open_file {
   public:
-    open_file(const char* name) : _fp(open(fp)), size_t(get_size()) {}
+    open_file(const char* name) : _fp(open(name)), _size(get_size()) {}
     ~open_file() { fclose(_fp); }
 
     size_t size() const { return _size; }
@@ -22,12 +24,12 @@ class open_file {
 
     int read(uint8_t* data, size_t length) {
         auto cdata = reinterpret_cast<char*>(data);
-        return fread(cdata, 1, length, _fp)
+        return fread(cdata, 1, length, _fp);
     }
 
     int write(uint8_t const* data, size_t length) {
-        auto cdata = reinterpret_cast<char*>(data);
-        return fwrite(cdata, 1, length, _fp)
+        auto cdata = reinterpret_cast<const char*>(data);
+        return fwrite(cdata, 1, length, _fp);
     }
 
     int seek(off_t offset, int whence = SEEK_SET) {
@@ -39,7 +41,7 @@ class open_file {
     size_t const _size;
 
     FILE* open(const char* name) {
-        if (auto fp = fopen(name, mode))
+        if (auto fp = fopen(name, "r+"))
             return fp;
         throw std::runtime_error(name);
     }

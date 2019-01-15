@@ -1,18 +1,21 @@
 #pragma once
 
 #include <stdlib.h>
+#include <algorithm>
 #include <array>
-
-#include "open_file.h"
+#include <vector>
 
 namespace tom {
 
-template <typename file_type = open_file, size_t BLOCK_SIZE = 0x1000>
+template <typename file_type, size_t BLOCK_SIZE = 0x1000>
 class sorter {
   public:
-    sorter(const char* name, size_t memory) :
-            _chunk(memory / BLOCK_SIZE),
-            _file(file_type(name)) {
+    sorter(file_type& file, size_t memory) :
+            _file(file),
+            _chunk(memory / BLOCK_SIZE) {
+    }
+
+    void sort() {
         sort_chunks();
         merge_chunks();
     }
@@ -32,10 +35,10 @@ class sorter {
         range file;   // Range within a file (in Blocks)
     };
 
+    file_type& _file;
     chunk_type _chunk;
-    file_type _file;
 
-    buffer _output = {};
+    buffer _output;
     std::vector<buffer> _inputs;
 
     void sort_chunks() {
@@ -63,7 +66,7 @@ class sorter {
         for (size_t i = 0; i < K; ++i)
             _inputs.push_back({{i * B, i * B}, {i * M, (i + 1) * M}});
 
-        _output.block = {K * B, M};
+        _output = {{K * B, M}, {0, 0}};
 
         while (true) {
             buffer* min = {};
