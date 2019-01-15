@@ -7,17 +7,21 @@
 
 namespace tom {
 
-template <typename file_type, size_t BLOCK_SIZE = 0x1000>
+template <size_t BLOCK_SIZE, typename file_type>
 class sorter {
   public:
     sorter(file_type& file, size_t memory) :
             _file(file),
             _chunk(memory / BLOCK_SIZE) {
+        if (_chunk.empty() && _file.size())
+            throw std::runtime_error("Can't sort non-empty file with 0 memory");
     }
 
     void sort() {
-        sort_chunks();
-        merge_chunks();
+        if (!_chunk.empty()) {
+            sort_chunks();
+            merge_chunks();
+        }
     }
 
   private:
@@ -44,13 +48,13 @@ class sorter {
     void sort_chunks() {
         while (true) {
             auto const pos = _file.tell();
-            auto const count = read_blocks(0, _chunk.size());
+            auto const count = read_blocks({0, _chunk.size()});
             if (!count)
                 break;
             _file.seek(pos);
 
             std::sort(_chunk.begin(), _chunk.begin() + count);
-            write_blocks(_chunk.begin(), _chunk.begin() + count);
+            write_blocks({0, count});
         }
     }
 
@@ -61,6 +65,9 @@ class sorter {
         auto const N = (_file.size() + BLOCK_SIZE - 1) / BLOCK_SIZE;
         auto const K = (N + M - 1) / M;
         auto const B = M / (K + 1);
+
+        if (K <= 1)
+            return;
 
         _inputs.reserve(K);
         for (size_t i = 0; i < K; ++i)
@@ -88,8 +95,8 @@ class sorter {
             }
             if (!min || _output.block.empty()) {
                 _file.seek(_output.file.begin * BLOCK_SIZE);
-                _output.file.begin += write_blocks(_output.chunk);
-                _output.chunk.begin = K * B;
+                _output.file.begin += write_blocks(_output.block);
+                _output.block.begin = K * B;
             }
             if (!min)
                 break;
@@ -119,7 +126,7 @@ class sorter {
 
     size_t write_blocks(range r) {
         for (auto i = r.begin; i < r.end; ++i)
-            _file.write(_chunk[i].front());
+            _file.write(&_chunk[i].front(), BLOCK_SIZE);
         return r.end - r.begin;
     }
 };

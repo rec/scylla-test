@@ -8,7 +8,7 @@ namespace tom {
 /** Like open_file but backed by std::string, for testing */
 class string_file {
   public:
-    string_file(std::string&& s) : _contents(std::move(s)) {}
+    string_file(std::string& s) : _contents(s) {}
 
     size_t size() const { return _contents.size(); }
     off_t tell() const { return _position; }
@@ -43,7 +43,7 @@ class string_file {
     }
 
   private:
-    std::string _contents;
+    std::string& _contents;
     size_t _position;
 };
 
