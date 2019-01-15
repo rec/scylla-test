@@ -54,11 +54,8 @@ class sorter {
         }
     }
 
-#if 1
-    // void sort_chunks() {}
-    void merge_chunks() {}
-#else
     void merge_chunks() {
+#if 0
         // A K-way merge: file size N, memory size M, and K buffers of size B
         // https://en.wikipedia.org/wiki/External_sorting#External_merge_sort
         auto const M = _chunk.size();
@@ -97,6 +94,7 @@ class sorter {
             if (!min)
                 break;
         }
+#endif
     }
 
     block_type& get_block(buffer const& buf) {
@@ -125,7 +123,6 @@ class sorter {
             _file.write(_chunk[i].front());
         return r.end - r.begin;
     }
-#endif
 };
 
 }  // namespace tom
