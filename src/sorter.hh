@@ -15,14 +15,6 @@ class sorter {
             _chunk(memory / BLOCK_SIZE) {
     }
 
-#if 1
-    void sort() {}
-    using block_type = std::array<uint8_t, BLOCK_SIZE>;
-    using chunk_type = std::vector<block_type>;
-    file_type& _file;
-    chunk_type _chunk;
-
-#else
     void sort() {
         sort_chunks();
         merge_chunks();
@@ -46,6 +38,11 @@ class sorter {
     file_type& _file;
     chunk_type _chunk;
 
+#if 1
+    void sort_chunks() {}
+    void merge_chunks() {}
+
+#else
     buffer _output;
     std::vector<buffer> _inputs;
 
