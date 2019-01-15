@@ -76,24 +76,28 @@ class sorter {
             range file;   // Range within a file (in Blocks)
         };
 
-        buffer output;
-        std::vector<buffer> inputs;
+        auto get_block = [&] (const buffer& buf) {
+            return _chunk[buf.block.begin];
+        };
 
-        inputs.reserve(K);
-        for (size_t i = 1; i <= K; ++i)
-            inputs.push_back({i * B, i * B}, {(i - 1) * M, i * M}});
+        buffer out{{K * B, K * B}, {0, 0}};
+        std::vector<buffer> ins;
 
-        output = {{K * B, K * B}, {0, 0}};
+        ins.reserve(K);
+        for (size_t i = 0; i < K; ++i)
+            ins.push_back({{i * B, i * B}, {i * M, (i + 1) * M}});
 
         while (true) {
             buffer* min = {};
-            for (auto& buf : inputs) {
+            for (auto& buf : ins) {
+                auto const i = &buf - &ins.front();
                 auto& [b, f] = buf;
+
                 if (b.empty() && !f.empty()) {
                     _file.seek(f.begin * BLOCK_SIZE);
-                    auto count = read_blocks(b.begin - B, b.begin);
+                    auto const count = read_blocks(i * B, (i + 1) * B);
+                    b = {i * B, i * B + count};
                     f.begin += count;
-                    b.end += B;
                 }
                 if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
                     min = &buf;
@@ -101,27 +105,24 @@ class sorter {
             if (min) {
                 std::cout
                         << "-> found min "
-                        << (min - &inputs[0])
+                        << (min - &ins[0])
                         << " entry: "
                         << (char) get_block(*min)[0]
                         << '\n';
-                get_block(output) = get_block(*min);
+                get_block(out) = get_block(*min);
                 min->block.begin++;
-                output.block.begin++;
+                out.block.begin++;
             }
 
-            if (!min || output.block.end >= M) {
-                _file.seek(output.file.begin * BLOCK_SIZE);
-                output.file.begin += write_blocks(output.block);
-                output.block.end = K * B;
+            if (!min || out.block.end >= M) {
+                _file.seek(out.file.begin * BLOCK_SIZE);
+                out.file.begin += write_blocks(
+                    out.block.begin, out.block.end);
+                out.block.end = K * B;
             }
             if (!min)
                 break;
         }
-    }
-
-    block_type& get_block(buffer const& buf) {
-        return _chunk[buf.block.begin];
     }
 
     size_t read_blocks(size_t begin, size_t end) {
