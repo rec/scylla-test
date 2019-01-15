@@ -111,13 +111,14 @@ class sorter {
                         << '\n';
                 get_block(out) = get_block(*min);
                 min->block.begin++;
-                out.block.begin++;
+                out.block.end++;
             }
 
             if (!min || out.block.end >= M) {
+                std::cout << "writing " << out.block.begin
+                          << ", " << out.block.end << '\n';
                 _file.seek(out.file.begin * BLOCK_SIZE);
-                out.file.begin += write_blocks(
-                    out.block.begin, out.block.end);
+                out.file.begin += write_blocks(out.block.begin, out.block.end);
                 out.block.end = K * B;
             }
             if (!min)
