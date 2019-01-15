@@ -23,26 +23,29 @@ TEST_CASE( "Throws when memory can't fit two blocks", "[throws_zero]" ) {
     REQUIRE_THROWS(tom::sort_string<1>(s, 1));
 }
 
-TEST_CASE( "Blocks of size 1, single element", "[one_one]" ) {
+TEST_CASE( "single element, 2 blocks", "[one_two]" ) {
     std::string s = "1";
     tom::sort_string<1>(s, 2);
     REQUIRE(s == "1");
 }
 
-TEST_CASE( "2 blocks of size 1, four elements", "[one_two]" ) {
+TEST_CASE( "4 elements, 4 blocks", "[four_four]" ) {
     std::string s = "4321";
-    tom::sort_string<1>(s, 2);
+    tom::sort_string<1>(s, 4);
     REQUIRE(s == "1234");
 
-    tom::sort_string<1>(s, 2);
+    tom::sort_string<1>(s, 4);
     REQUIRE(s == "1234");
 }
 
-TEST_CASE( "4 blocks of size 1, four elements", "[one_four]" ) {
+TEST_CASE( "2 blocks, four elements", "[two_four]" ) {
+    // Not enough space to do that!
     std::string s = "4321";
-    tom::sort_string<1>(s, 4);
-    REQUIRE(s == "1234");
+    REQUIRE_THROWS(tom::sort_string<1>(s, 2));
+}
 
-    tom::sort_string<1>(s, 4);
-    REQUIRE(s == "1234");
+TEST_CASE( "4 blocks, 16 elements", "[four_sixteen]" ) {
+    std::string s = "fedcba9876543210";
+    tom::sort_string<1>(s, 8);
+    REQUIRE(s == "0123456789abcdef");
 }

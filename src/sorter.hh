@@ -68,7 +68,16 @@ class sorter {
 
         if (K <= 1)
             return;
-        std::cout << "K:" << K << '\n';
+
+        if (B < 2)
+            throw std::runtime_error("Not enough memory to sort file");
+
+        std::cout
+                << " M:" << M
+                << " N:" << N
+                << " K:" << K
+                << " B:" << B
+                << '\n';
 
         _inputs.reserve(K);
         for (size_t i = 0; i < K; ++i)
@@ -90,6 +99,12 @@ class sorter {
                     min = &buf;
             }
             if (min) {
+                std::cout
+                        << "-> found min "
+                        << (min - &_inputs[0])
+                        << " entry: "
+                        << (char) get_block(*min)[0]
+                        << '\n';
                 get_block(_output) = get_block(*min);
                 min->block.begin++;
                 _output.block.begin++;
