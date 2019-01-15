@@ -14,18 +14,24 @@ class string_file {
     off_t tell() const { return _position; }
 
     int read(uint8_t* data, size_t length) {
+        if (_position >= _contents.size())
+            return 0;
+
         auto const to_copy = std::min(length, size() - _position);
         auto const cdata = reinterpret_cast<char*>(data);
         auto const begin = _contents.begin() + _position;
 
         std::copy(begin, begin + to_copy, data);
+        _position += to_copy;
         return static_cast<int>(to_copy);
     }
 
     int write(uint8_t const* data, size_t length) {
         auto const to_copy = std::min(length, size() - _position);
         auto cdata = reinterpret_cast<const char*>(data);
+
         std::copy(data, data + to_copy, _contents.begin() + _position);
+        _position += to_copy;
         return static_cast<int>(to_copy);
     }
 

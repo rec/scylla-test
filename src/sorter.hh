@@ -13,8 +13,8 @@ class sorter {
     sorter(file_type& file, size_t memory) :
             _file(file),
             _chunk(memory / BLOCK_SIZE) {
-        if (_chunk.empty() && _file.size())
-            throw std::runtime_error("Can't sort non-empty file with 0 memory");
+        if (_chunk.size() < 2 && _file.size())
+            throw std::runtime_error("Not enough memory to sort file");
     }
 
     void sort() {
@@ -68,6 +68,7 @@ class sorter {
 
         if (K <= 1)
             return;
+        std::cout << "K:" << K << '\n';
 
         _inputs.reserve(K);
         for (size_t i = 0; i < K; ++i)
@@ -109,15 +110,15 @@ class sorter {
 
     size_t read_blocks(range r) {
         auto i = r.begin;
-        for (; i != r.end; ++i) {
+        for (; i < r.end; ++i) {
             auto& block = _chunk[i];
             auto bytes_read = _file.read(&block.front(), BLOCK_SIZE);
             if (bytes_read < BLOCK_SIZE) {
                 // Clear a partial block or omit an empty block
-                if (bytes_read)
+                if (bytes_read) {
                     std::fill(block.begin() + bytes_read, block.end(), 0);
-                else
-                    i--;
+                    i++;
+                }
                 break;
             }
         }
