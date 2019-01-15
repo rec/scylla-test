@@ -70,17 +70,16 @@ class sorter {
 
         while (true) {
             buffer* min = {};
-            for (auto& [b, f] : _inputs) {
-#if 0
+            for (auto& buf : _inputs) {
+                auto& [b, f] = buf;
                 if (b.empty() && !f.empty()) {
                     _file.seek(f.begin * BLOCK_SIZE);
                     auto read = read_blocks(b);
                     f.begin += read;
                     b.end += read;
                 }
-                if (!b.empty() && (!min || get_block(*min) > get_block(i)))
-                    min = &i;
-#endif
+                if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
+                    min = &buf;
             }
             if (min) {
                 get_block(_output) = get_block(*min);
