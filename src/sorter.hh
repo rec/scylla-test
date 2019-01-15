@@ -55,7 +55,6 @@ class sorter {
     }
 
     void merge_chunks() {
-#if 0
         // A K-way merge: file size N, memory size M, and K buffers of size B
         // https://en.wikipedia.org/wiki/External_sorting#External_merge_sort
         auto const M = _chunk.size();
@@ -72,6 +71,7 @@ class sorter {
         while (true) {
             buffer* min = {};
             for (auto& [b, f] : _inputs) {
+#if 0
                 if (b.empty() && !f.empty()) {
                     _file.seek(f.begin * BLOCK_SIZE);
                     auto read = read_blocks(b);
@@ -80,6 +80,7 @@ class sorter {
                 }
                 if (!b.empty() && (!min || get_block(*min) > get_block(i)))
                     min = &i;
+#endif
             }
             if (min) {
                 get_block(_output) = get_block(*min);
@@ -87,14 +88,13 @@ class sorter {
                 _output.block.begin++;
             }
             if (!min || _output.block.empty()) {
-                _file.seek(output.file.begin * BLOCK_SIZE);
-                output.file.begin += write_blocks(output.chunk);
-                output.chunk.begin = K * B;
+                _file.seek(_output.file.begin * BLOCK_SIZE);
+                _output.file.begin += write_blocks(_output.chunk);
+                _output.chunk.begin = K * B;
             }
             if (!min)
                 break;
         }
-#endif
     }
 
     block_type& get_block(buffer const& buf) {
