@@ -28,33 +28,19 @@ class sorter {
     using block_type = std::array<uint8_t, BLOCK_SIZE>;
     using chunk_type = std::vector<block_type>;
 
-    // A range of blocks.
-    struct range {
-        size_t begin, end;
-        bool empty() const { return begin >= end; }
-    };
-
-    struct buffer {
-        range block;  // Range of blocks within _chunk
-        range file;   // Range within a file (in Blocks)
-    };
-
     file_type& _file;
     chunk_type _chunk;
-
-    buffer _output;
-    std::vector<buffer> _inputs;
 
     void sort_chunks() {
         while (true) {
             auto const pos = _file.tell();
-            auto const count = read_blocks({0, _chunk.size()});
+            auto const count = read_blocks(0, _chunk.size());
             if (!count)
                 break;
             _file.seek(pos);
 
             std::sort(_chunk.begin(), _chunk.begin() + count);
-            write_blocks({0, count});
+            write_blocks(0, count);
         }
     }
 
@@ -79,21 +65,35 @@ class sorter {
                 << " B:" << B
                 << '\n';
 
-        _inputs.reserve(K);
-        for (size_t i = 0; i < K; ++i)
-            _inputs.push_back({{i * B, i * B}, {i * M, (i + 1) * M}});
+        // A range of blocks.
+        struct range {
+            size_t begin, end;
+            bool empty() const { return begin >= end; }
+        };
 
-        _output = {{K * B, M}, {0, 0}};
+        struct buffer {
+            range block;  // Range of blocks within _chunk
+            range file;   // Range within a file (in Blocks)
+        };
+
+        buffer output;
+        std::vector<buffer> inputs;
+
+        inputs.reserve(K);
+        for (size_t i = 1; i <= K; ++i)
+            inputs.push_back({i * B, i * B}, {(i - 1) * M, i * M}});
+
+        output = {{K * B, K * B}, {0, 0}};
 
         while (true) {
             buffer* min = {};
-            for (auto& buf : _inputs) {
+            for (auto& buf : inputs) {
                 auto& [b, f] = buf;
                 if (b.empty() && !f.empty()) {
                     _file.seek(f.begin * BLOCK_SIZE);
-                    auto read = read_blocks(b);
-                    f.begin += read;
-                    b.end += read;
+                    auto count = read_blocks(b.begin - B, b.begin);
+                    f.begin += count;
+                    b.end += B;
                 }
                 if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
                     min = &buf;
@@ -101,18 +101,19 @@ class sorter {
             if (min) {
                 std::cout
                         << "-> found min "
-                        << (min - &_inputs[0])
+                        << (min - &inputs[0])
                         << " entry: "
                         << (char) get_block(*min)[0]
                         << '\n';
-                get_block(_output) = get_block(*min);
+                get_block(output) = get_block(*min);
                 min->block.begin++;
-                _output.block.begin++;
+                output.block.begin++;
             }
-            if (!min || _output.block.empty()) {
-                _file.seek(_output.file.begin * BLOCK_SIZE);
-                _output.file.begin += write_blocks(_output.block);
-                _output.block.begin = K * B;
+
+            if (!min || output.block.end >= M) {
+                _file.seek(output.file.begin * BLOCK_SIZE);
+                output.file.begin += write_blocks(output.block);
+                output.block.end = K * B;
             }
             if (!min)
                 break;
@@ -123,9 +124,9 @@ class sorter {
         return _chunk[buf.block.begin];
     }
 
-    size_t read_blocks(range r) {
-        auto i = r.begin;
-        for (; i < r.end; ++i) {
+    size_t read_blocks(size_t begin, size_t end) {
+        auto i = begin;
+        for (; i < end; ++i) {
             auto& block = _chunk[i];
             auto bytes_read = _file.read(&block.front(), BLOCK_SIZE);
             if (bytes_read < BLOCK_SIZE) {
@@ -137,13 +138,13 @@ class sorter {
                 break;
             }
         }
-        return i - r.begin;
+        return i - begin;
     }
 
-    size_t write_blocks(range r) {
-        for (auto i = r.begin; i < r.end; ++i)
+    size_t write_blocks(size_t begin, size_t end) {
+        for (auto i = begin; i < end; ++i)
             _file.write(&_chunk[i].front(), BLOCK_SIZE);
-        return r.end - r.begin;
+        return end - begin;
     }
 };
 
