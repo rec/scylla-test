@@ -38,11 +38,6 @@ class sorter {
     file_type& _file;
     chunk_type _chunk;
 
-#if 1
-    void sort_chunks() {}
-    void merge_chunks() {}
-
-#else
     buffer _output;
     std::vector<buffer> _inputs;
 
@@ -59,6 +54,10 @@ class sorter {
         }
     }
 
+#if 1
+    // void sort_chunks() {}
+    void merge_chunks() {}
+#else
     void merge_chunks() {
         // A K-way merge: file size N, memory size M, and K buffers of size B
         // https://en.wikipedia.org/wiki/External_sorting#External_merge_sort
