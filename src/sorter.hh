@@ -109,10 +109,9 @@ class sorter {
                     f.begin += count;
                 }
 
-                if (!b.empty() && (!min || get_block(*min) > get_block(buf))) {
+                if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
                     min = &buf;
-                    buf.block.begin++;
-                }
+
             }
 
             if (!min)
@@ -120,6 +119,7 @@ class sorter {
 
             auto min_block = &get_block(*min);
             write_blocks(_file, min_block, min_block + 1);
+            min->block.begin++;
         }
     }
 };
