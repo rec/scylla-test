@@ -38,25 +38,6 @@ TEST_CASE( "4 elements, 4 blocks", "[four_four]" ) {
     REQUIRE(s == "1234");
 }
 
-TEST_CASE( "4 elements, 4 blocks, 2", "[four_four_two]" ) {
-    std::cout << "FIRST\n";
-    std::string s = "1234";
-    tom::sort_string<1>(s, 4);
-    std::cout << "TESTING\n";
-    REQUIRE(s == "1234");
-
-#if 0
-    std::cout << "SECOND\n";
-    tom::sort_string<1>(s, 4);
-    REQUIRE(s == "1234");
-    tom::sort_string<1>(s, 4);
-    REQUIRE(s == "1234");
-
-    tom::sort_string<1>(s, 4);
-    REQUIRE(s == "1234");
-#endif
-}
-
 TEST_CASE( "2 blocks, four elements", "[two_four]" ) {
     // Not enough space to do that!
     std::string s = "4321";
