@@ -18,7 +18,7 @@ class sorter {
             _tmpfile(tmpfile),
             _chunk(memory / BLOCK_SIZE) {
         if (_chunk.size() < 2 && _file.size())
-            throw std::runtime_error("Not enough memory to sort file");
+            throw std::runtime_error("You need at least two blocks to sort");
     }
 
     void sort() {
@@ -58,15 +58,12 @@ class sorter {
         auto const M = _chunk.size();
         auto const N = (_file.size() + BLOCK_SIZE - 1) / BLOCK_SIZE;
         auto const K = (N + M - 1) / M;
-        auto const B = M / (K + 1);
+        auto const B = M / K;
 
         if (K <= 1) {
             write_blocks(_file, _chunk.begin(), _chunk.end());
             return;
         }
-
-        if (B < 2)
-            throw std::runtime_error("Not enough memory to sort file");
 
         std::cout
                 << " M:" << M
@@ -74,6 +71,9 @@ class sorter {
                 << " K:" << K
                 << " B:" << B
                 << '\n';
+
+        if (B < 2)
+            throw std::runtime_error("Not enough memory to sort file");
 
         // A range of blocks.
         struct range {
@@ -109,8 +109,10 @@ class sorter {
                     f.begin += count;
                 }
 
-                if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
+                if (!b.empty() && (!min || get_block(*min) > get_block(buf))) {
                     min = &buf;
+                    buf.block.begin++;
+                }
             }
 
             if (!min)
