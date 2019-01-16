@@ -49,8 +49,6 @@ class sorter {
         }
         _file.seek(0);
         _tmpfile.seek(0);
-        // std::cout << "one: '" << _file.contents() << "'\n";
-        // std::cout << "two: '" << _tmpfile.contents() << "'\n";
     }
 
     void merge_chunks() {
@@ -106,15 +104,10 @@ class sorter {
                 auto& [b, f] = buf;
 
                 if (b.empty() && !f.empty()) {
-                    if (true) std::cout << "   seek "
-                                        << f.begin * BLOCK_SIZE << '\n';
                     _tmpfile.seek(f.begin * BLOCK_SIZE);
                     auto const begin = _chunk.begin() + i * B;
                     auto const end = begin + B;
                     auto const count = read_blocks(_tmpfile, begin, end);
-                    if (true) std::cout << "   read_blocks  " << i * B << ", "
-                                        << (i + 1) * B << " :"
-                                        << f.begin * BLOCK_SIZE << '\n';
                     b = {i * B, i * B + count};
                     f.begin += count;
                 }
