@@ -39,25 +39,17 @@ class sorter {
     void sort_chunks() {
         // Sort from the input file to the tmpfile
         while (true) {
-            std::cout << "zero: " << _file.contents()
-                      << " " << _tmpfile.contents()
-                      << '\n';
             auto const begin = _chunk.begin();
             auto const blocks_read = read_blocks(_file, begin, _chunk.end());
             auto const end = begin + blocks_read;
-            if (begin == end) {
-                std::cout << "oops " << blocks_read << "\n";
+            if (begin == end)
                 break;
-            }
 
             std::sort(begin, end);
             write_blocks(_tmpfile, begin, end);
         }
         _file.seek(0);
         _tmpfile.seek(0);
-        std::cout << "one: " << _file.contents()
-                  << " " << _tmpfile.contents()
-                  << '\n';
     }
 
     void merge_chunks() {
@@ -67,7 +59,6 @@ class sorter {
         auto const N = (_file.size() + BLOCK_SIZE - 1) / BLOCK_SIZE;
         auto const K = (N + M - 1) / M;
         auto const B = M / (K + 1);
-        auto const OB = M - B * K;
 
         if (K <= 1) {
             write_blocks(_file, _chunk.begin(), _chunk.end());
@@ -82,7 +73,6 @@ class sorter {
                 << " N:" << N
                 << " K:" << K
                 << " B:" << B
-                << " OB:" << OB
                 << '\n';
 
         // A range of blocks.
