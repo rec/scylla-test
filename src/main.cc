@@ -45,7 +45,7 @@ TEST_CASE( "2 blocks, four elements", "[two_four]" ) {
 }
 
 TEST_CASE( "4 blocks, 16 elements", "[four_sixteen]" ) {
-    std::string s = "fedcba9876543210";
+    std::string s = "PONMLKJIHGFEDCBA";
     tom::sort_string<1>(s, 8);
-    REQUIRE(s == "0123456789abcdef");
+    REQUIRE(s == "ABCDEFGHIJKLMNOP");
 }

@@ -51,6 +51,7 @@ class sorter {
         auto const N = (_file.size() + BLOCK_SIZE - 1) / BLOCK_SIZE;
         auto const K = (N + M - 1) / M;
         auto const B = M / (K + 1);
+        auto const OB = M - B * K;
 
         if (K <= 1)
             return;
@@ -63,6 +64,7 @@ class sorter {
                 << " N:" << N
                 << " K:" << K
                 << " B:" << B
+                << " OB:" << OB
                 << '\n';
 
         // A range of blocks.
@@ -87,36 +89,47 @@ class sorter {
         for (size_t i = 0; i < K; ++i)
             ins.push_back({{i * B, i * B}, {i * M, (i + 1) * M}});
 
+        _file.seek(0);
         while (true) {
             buffer* min = {};
+            int min_i = -1;
             for (auto& buf : ins) {
                 auto const i = &buf - &ins.front();
                 auto& [b, f] = buf;
 
                 if (b.empty() && !f.empty()) {
+                    if (true) std::cout << "   seek "
+                                        << f.begin * BLOCK_SIZE << '\n';
                     _file.seek(f.begin * BLOCK_SIZE);
                     auto const count = read_blocks(i * B, (i + 1) * B);
                     b = {i * B, i * B + count};
                     f.begin += count;
                 }
-                if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
+                if (min)
+                    if (false) std::cout << "blocks: "
+                          << char(get_block(*min)[0]) << ": "
+                          << char(get_block(buf)[0]) << " "
+                          << min_i
+                          << '\n';
+                if (!b.empty() && (!min || get_block(*min) > get_block(buf))) {
                     min = &buf;
+                    min_i = i;
+                }
             }
             if (min) {
-                std::cout
-                        << "-> found min "
+                if (not false) std::cout
+                        << "-> min "
                         << (min - &ins[0])
                         << " entry: "
                         << (char) get_block(*min)[0]
                         << '\n';
-                get_block(out) = get_block(*min);
+                _chunk[out.block.end++] = get_block(*min);
                 min->block.begin++;
-                out.block.end++;
             }
 
-            if (!min || out.block.end >= M) {
-                std::cout << "writing " << out.block.begin
-                          << ", " << out.block.end << '\n';
+            if (!min || out.block.end - out.block.begin >= M) {
+                if (false) std::cout << "writing " << out.block.begin
+                           << ", " << out.block.end << '\n';
                 _file.seek(out.file.begin * BLOCK_SIZE);
                 out.file.begin += write_blocks(out.block.begin, out.block.end);
                 out.block.end = K * B;
@@ -127,6 +140,7 @@ class sorter {
     }
 
     size_t read_blocks(size_t begin, size_t end) {
+        auto t = _file.tell();
         auto i = begin;
         for (; i < end; ++i) {
             auto& block = _chunk[i];
@@ -140,12 +154,17 @@ class sorter {
                 break;
             }
         }
+        if (true) std::cout << "   read_blocks  " << begin << ", "
+                            << end << " :" << t << '\n';
         return i - begin;
     }
 
     size_t write_blocks(size_t begin, size_t end) {
+        auto t = _file.tell();
         for (auto i = begin; i < end; ++i)
             _file.write(&_chunk[i].front(), BLOCK_SIZE);
+        if (true) std::cout << "   write_blocks " << begin << ", " << end << ": "
+                            << t << ':' << _file.contents() << '\n';
         return end - begin;
     }
 };

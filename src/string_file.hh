@@ -10,6 +10,7 @@ class string_file {
   public:
     string_file(std::string& s) : _contents(s) {}
 
+    std::string const& contents() { return _contents; }
     size_t size() const { return _contents.size(); }
     off_t tell() const { return _position; }
 
