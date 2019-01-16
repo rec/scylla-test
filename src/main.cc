@@ -18,7 +18,7 @@ TEST_CASE( "Throws when zero memory", "[throws_zero]" ) {
     REQUIRE_THROWS(tom::sort_string(s, 0));
 }
 
-TEST_CASE( "Throws when memory can't fit two blocks", "[throws_zero]" ) {
+TEST_CASE( "Throws when memory can't fit two blocks", "[throws_two]" ) {
     std::string s = "non-empty";
     REQUIRE_THROWS(tom::sort_string<1>(s, 1));
 }

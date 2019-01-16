@@ -45,6 +45,10 @@ class sorter {
             std::sort(begin, end);
             write_blocks(_tmpfile, begin, end);
         }
+        _file.seek(0);
+        _tmpfile.seek(0);
+        // std::cout << "one: '" << _file.contents() << "'\n";
+        // std::cout << "two: '" << _tmpfile.contents() << "'\n";
     }
 
     void merge_chunks() {
@@ -56,8 +60,10 @@ class sorter {
         auto const B = M / (K + 1);
         auto const OB = M - B * K;
 
-        if (K <= 1)
+        if (K <= 1) {
+            write_blocks(_file, _chunk.begin(), _chunk.end());
             return;
+        }
 
         if (B < 2)
             throw std::runtime_error("Not enough memory to sort file");
@@ -90,7 +96,6 @@ class sorter {
         for (size_t i = 0; i < K; ++i)
             ins.push_back({{i * B, i * B}, {i * M, (i + 1) * M}});
 
-        _file.seek(0);
         while (true) {
             buffer* min = {};
             int min_i = -1;
