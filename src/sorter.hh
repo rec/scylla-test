@@ -5,6 +5,8 @@
 #include <array>
 #include <vector>
 
+#include "blocks.hh"
+
 namespace tom {
 
 template <size_t BLOCK_SIZE, typename file_type>
