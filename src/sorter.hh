@@ -10,6 +10,7 @@ namespace tom {
 template <size_t BLOCK_SIZE, typename file_type>
 class sorter {
   public:
+    bool _debug = false;
     sorter(file_type& file, size_t memory) :
             _file(file),
             _chunk(memory / BLOCK_SIZE) {
@@ -102,6 +103,9 @@ class sorter {
                                         << f.begin * BLOCK_SIZE << '\n';
                     _file.seek(f.begin * BLOCK_SIZE);
                     auto const count = read_blocks(i * B, (i + 1) * B);
+                    if (true) std::cout << "   read_blocks  " << i * B << ", "
+                                        << (i + 1) * B << " :"
+                                        << f.begin * BLOCK_SIZE << '\n';
                     b = {i * B, i * B + count};
                     f.begin += count;
                 }
@@ -154,8 +158,6 @@ class sorter {
                 break;
             }
         }
-        if (true) std::cout << "   read_blocks  " << begin << ", "
-                            << end << " :" << t << '\n';
         return i - begin;
     }
 
