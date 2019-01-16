@@ -39,16 +39,25 @@ class sorter {
     void sort_chunks() {
         // Sort from the input file to the tmpfile
         while (true) {
+            std::cout << "zero: " << _file.contents()
+                      << " " << _tmpfile.contents()
+                      << '\n';
             auto const begin = _chunk.begin();
-            auto const end = begin + read_blocks(_file, begin, _chunk.end());
-            if (begin == end)
+            auto const blocks_read = read_blocks(_file, begin, _chunk.end());
+            auto const end = begin + blocks_read;
+            if (begin == end) {
+                std::cout << "oops " << blocks_read << "\n";
                 break;
+            }
 
             std::sort(begin, end);
             write_blocks(_tmpfile, begin, end);
         }
         _file.seek(0);
         _tmpfile.seek(0);
+        std::cout << "one: " << _file.contents()
+                  << " " << _tmpfile.contents()
+                  << '\n';
     }
 
     void merge_chunks() {
@@ -98,7 +107,6 @@ class sorter {
 
         while (true) {
             buffer* min = {};
-            int min_i = -1;
             for (auto& buf : ins) {
                 auto const i = &buf - &ins.front();
                 auto& [b, f] = buf;
@@ -106,20 +114,18 @@ class sorter {
                 if (b.empty() && !f.empty()) {
                     _tmpfile.seek(f.begin * BLOCK_SIZE);
                     auto const begin = _chunk.begin() + i * B;
-                    auto const end = begin + B;
-                    auto const count = read_blocks(_tmpfile, begin, end);
+                    auto const count = read_blocks(_tmpfile, begin, begin + B);
                     b = {i * B, i * B + count};
                     f.begin += count;
                 }
 
-                if (!b.empty() && (!min || get_block(*min) > get_block(buf))) {
+                if (!b.empty() && (!min || get_block(*min) > get_block(buf)))
                     min = &buf;
-                    min_i = i;
-                }
             }
 
             if (!min)
-                break;
+                return;
+
             auto min_block = &get_block(*min);
             write_blocks(_file, min_block, min_block + 1);
         }

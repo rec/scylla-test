@@ -15,8 +15,11 @@ class string_file {
     off_t tell() const { return _position; }
 
     int read(uint8_t* data, size_t length) {
-        if (_position >= _contents.size())
+        if (_position >= _contents.size()) {
+            std::cout << "position > size " << _position << ' '
+                      << _contents.size() << "\n";
             return 0;
+        }
 
         auto const to_copy = std::min(length, size() - _position);
         auto const cdata = reinterpret_cast<char*>(data);
@@ -24,6 +27,8 @@ class string_file {
 
         std::copy(begin, begin + to_copy, data);
         _position += to_copy;
+        std::cout << "string_file: " << length << ' ' << size()
+                  << ' ' << _position << '\n';
         return static_cast<int>(to_copy);
     }
 
@@ -51,7 +56,7 @@ class string_file {
 
   private:
     std::string& _contents;
-    size_t _position;
+    size_t _position = 0;
 };
 
 
