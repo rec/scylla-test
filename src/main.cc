@@ -62,40 +62,29 @@ TEST_CASE( "repeats", "[repeats]" ) {
     s = "ABABBABAAABBBBAA";
     tom::sort_string<1>(s, 8);
     REQUIRE(s == "AAAAAAAABBBBBBBB");
+
+    s = "ABABBABAAABBBBAA";
+    tom::sort_string<2>(s, 8);
+    REQUIRE(s == "AAAAABABBABABBBB");
 }
 
 static const
 auto S = "CchVCrbzeJqvwaMaQZiLXuaDjxfsalokIpOAWmCdYUGRENBzHynSKgiPaaTtF";
 
 static const
-auto S_SORTED = "ABCCCDEFGHIJKLMNOPQRSTUVWXYZaaaaaabcdefghiijklmnopqrstuvwxyzz";
+auto S_SORT2 = "BzCcCdCrENFGRHyIpKgMaOAQZTtWmXuYUaDaaalbzeJfshViLiPjxnokqvw";
 
 static const
-int MEMORY_SIZES[] = {24, 55};
+auto S_SORT3 = "CchFGREHynJqvNBzSKgVCrWmCaQZaTtbzedYUiiLXjxfokIpOAsaluaDw";
 
-static const
-int BLOCK_SIZES[] = {1, 2, 5, 6, 7, 8, 9};
+TEST_CASE("big_one", "[big_one]" ) {
+    std::string s;
 
-TEST_CASE("memory", "[memory]" ) {
-    for (auto memory : MEMORY_SIZES) {
-        auto fmt = "memory: %d, block: %s\n";
-        {
-            printf(fmt, memory, 1);
-            std::string s(S);
-            tom::sort_string<1>(s, memory);
-            REQUIRE(s == S_SORTED);
-        }
-        {
-            printf(fmt, memory, 2);
-            std::string s(S);
-            tom::sort_string<2>(s, memory);
-            REQUIRE(s == S_SORTED);
-        }
-        if (memory >= 10) {
-            printf(fmt, memory, 5);
-            std::string s(S);
-            tom::sort_string<5>(s, memory);
-            REQUIRE(s == S_SORTED);
-        }
-    }
+    s = S;
+    tom::sort_string<2>(s, 24);
+    REQUIRE(s == std::string(S_SORT2));
+
+    s = S;
+    tom::sort_string<3>(s, 36);
+    REQUIRE(s == std::string(S_SORT3));
 }
