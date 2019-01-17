@@ -65,13 +65,6 @@ class sorter {
             return;
         }
 
-        std::cout
-                << " M:" << M
-                << " N:" << N
-                << " K:" << K
-                << " B:" << B
-                << '\n';
-
         if (B < 2)
             throw std::runtime_error("Not enough memory to sort file");
 

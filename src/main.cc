@@ -69,16 +69,23 @@ TEST_CASE( "repeats", "[repeats]" ) {
 }
 
 static const
-auto S = "CchVCrbzeJqvwaMaQZiLXuaDjxfsalokIpOAWmCdYUGRENBzHynSKgiPaaTtF";
+auto S = "CchVCrbzeJqvwaMaQZiLXuaDjxfslokIpOAWmCdYUGRENBzHynSKgiPaaTtF";
 
 static const
-auto S_SORT2 = "BzCcCdCrENFGRHyIpKgMaOAQZTtWmXuYUaDaaalbzeJfshViLiPjxnokqvw";
+auto S_SORT1 = "ABCCCDEFGHIJKLMNOPQRSTUVWXYZaaaaabcdefghiijklmnopqrstuvwxyzz";
 
 static const
-auto S_SORT3 = "CchFGREHynJqvNBzSKgVCrWmCaQZaTtbzedYUiiLXjxfokIpOAsaluaDw";
+auto S_SORT2 = "AWCcCrMaNBPaQZRESKUGXuaDaTbzdYeJfsgihViLjxkIlomCpOqvtFwaynzH";
+
+static const
+auto S_SORT3 = "BzHCchJqvKgiOAWPaaRENTtFVCrYUGaQZbzeiLXjxfkIpmCdslouaDwaMynS";
 
 TEST_CASE("big_one", "[big_one]" ) {
     std::string s;
+
+    s = S;
+    tom::sort_string<1>(s, 24);
+    REQUIRE(s == std::string(S_SORT1));
 
     s = S;
     tom::sort_string<2>(s, 24);

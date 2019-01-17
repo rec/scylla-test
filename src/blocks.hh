@@ -10,7 +10,8 @@ size_t read_blocks(file_type& file, Iterator begin, Iterator end) {
         auto bytes_read = file.read(&i->front(), i->size());
         if (bytes_read < i->size()) {
             // Clear a partial block or omit an empty block
-            if (bytes_read) {
+            if (bytes_read > 0) {
+                std::cout << "bytes_read " << bytes_read << '\n';
                 std::fill(i->begin() + bytes_read, i->end(), 0);
                 ++i;
             }
